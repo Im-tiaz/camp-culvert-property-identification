@@ -75,6 +75,10 @@ PRED_LABELS = [
     ("Silting_Prediction", "Silting_Confidence", "Silting"),
     ("Corrosion_Prediction", "Corrosion_Confidence", "Corrosion"),
     ("EndSection_Prediction", "EndSection_Confidence", "End Section"),
+    ("PhysicalDamage_Prediction", "PhysicalDamage_Confidence", "Physical Damage"),
+    ("ChannelCondition_Prediction", "ChannelCondition_Confidence", "Channel Condition"),
+    ("ErosionControl_Prediction", "ErosionControl_Confidence", "Erosion Control"),
+    ("ChannelType_Prediction", "ChannelType_Confidence", "Channel Type"),
 ]
 
 # Inventory column -> QC flag column (from merge_results.py) for the compare view
@@ -85,6 +89,10 @@ QC_TRIPLES = [
     ("Silting", "Silting_Prediction", "Silting_QC"),
     ("Corrosion", "Corrosion_Prediction", "Corrosion_QC"),
     ("Outlet End Section Type", "EndSection_Prediction", "EndSection_QC"),
+    ("Physical Damage", "PhysicalDamage_Prediction", "PhysicalDamage_QC"),
+    ("Channel Condition", "ChannelCondition_Prediction", "ChannelCondition_QC"),
+    ("Erosion Control", "ErosionControl_Prediction", "ErosionControl_QC"),
+    ("Channel Type", "ChannelType_Prediction", "ChannelType_QC"),
 ]
 
 
@@ -337,9 +345,12 @@ def build_ui():
             filt.change(_refilter, inputs=[state_review, filt], outputs=table_out)
 
         gr.Markdown(
-            "<small>Predictions are screening aids. Shape, material and end-section are "
-            "reliable automatic checks; silting, corrosion and count are flags for human "
-            "review. Always confirm flagged culverts against the photos.</small>")
+            "<small>Predictions are screening aids. Shape, material, end section and "
+            "dimensions are reliable automatic checks; physical damage, erosion control, "
+            "silting, corrosion, channel condition and channel type are screening flags "
+            "for human review; count is a soft flag (limited by single-end photos). "
+            "Channel type's running-water and irrigation classes are provisional pending "
+            "more data. Always confirm flagged culverts against the photos.</small>")
 
     return app
 
