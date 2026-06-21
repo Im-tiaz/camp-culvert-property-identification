@@ -1,0 +1,12 @@
+# CAMP Culvert ML Pipeline requirements
+# Install: pip install -r requirements.txt
+
+torch
+torchvision
+pandas
+numpy
+tqdm
+Pillow
+
+# Needed for Adam's YOLO models (material + shape/count):
+ultralytics

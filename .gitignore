@@ -1,0 +1,25 @@
+# data & imagery (never commit)
+all_images/
+*.csv
+nmdot_table_fixed.csv
+datasets/
+culvert_inference/datasets/
+
+# trained weights (too large / not for public repo)
+*.pt
+models/
+
+# outputs & logs
+outputs/
+*.out
+*.err
+*.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# os
+.DS_Store
