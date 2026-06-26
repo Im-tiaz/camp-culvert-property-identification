@@ -78,6 +78,10 @@ COL_MATERIAL = "Material"
 COL_SPAN = "Span (inches)"
 COL_RISE = "Rise (inches)"
 COL_OBJECTID = "OBJECTID"
+COL_COUNT = "Number of Culverts"
+COL_MBWIDTH = "Width of Multi-Barrel Culverts (ft)"
+COL_HACC = "Horizontal Accuracy (m)"
+GPS_THRESHOLD_M = 1.5   # hard requirement: horizontal accuracy must be <= 1.5 m
 
 
 def to_num(v):
@@ -206,7 +210,7 @@ def main():
         cid = str(rec.get(COL_ID, "")).strip()
         oid = str(rec.get(COL_OBJECTID, "")).strip()
         if not cid or cid.lower() == "nan":
-            cid = f"OBJECTID_{oid}"      # same fallback as download_all_images.py
+            cid = f"OBJECTID_{oid}"
 
         span = to_num(rec.get(COL_SPAN))
         rise = to_num(rec.get(COL_RISE))
@@ -214,6 +218,24 @@ def main():
         material = rec.get(COL_MATERIAL, "")
 
         flag, detail, std = check_record(shape, material, span, rise, args.tolerance)
+
+        # --- Rule: multi-barrel culvert (count > 2) should record a width ---
+        count_v = to_num(rec.get(COL_COUNT))
+        width_v = to_num(rec.get(COL_MBWIDTH))
+        if count_v is not None and count_v > 2:
+            mb_flag = "OK" if (width_v is not None and width_v > 0) else "MISSING_WIDTH"
+        else:
+            mb_flag = "NOT_APPLICABLE"
+
+        # --- Rule: horizontal GPS accuracy must meet the 1.5 m standard ---
+        hacc_v = to_num(rec.get(COL_HACC))
+        if hacc_v is None:
+            gps_flag = "NO_GPS_DATA"
+        elif hacc_v > GPS_THRESHOLD_M:
+            gps_flag = "EXCEEDS_1.5M"
+        else:
+            gps_flag = "OK"
+
         rows.append({
             "Culvert ID": cid,
             "OBJECTID": oid,
@@ -224,6 +246,8 @@ def main():
             "Dimension_Flag": flag,
             "Dimension_Detail": detail,
             "Closest_Standard": std,
+            "MultiBarrelWidth_Flag": mb_flag,
+            "GPSAccuracy_Flag": gps_flag,
         })
 
     out = pd.DataFrame(rows)
@@ -241,6 +265,14 @@ def main():
     n_bad = (out["Dimension_Flag"].isin(
         ["INVALID_DIMENSION", "SPAN_RISE_MISMATCH", "POSSIBLE_OD_MEASURED"])).sum()
     print(f"\n{n_bad} records flagged for QC review.")
+    print("\nMulti-barrel width flag summary:")
+    print(out["MultiBarrelWidth_Flag"].value_counts().to_string())
+    print("\nGPS accuracy flag summary (1.5 m standard):")
+    print(out["GPSAccuracy_Flag"].value_counts().to_string())
+    n_gps = (out["GPSAccuracy_Flag"] == "EXCEEDS_1.5M").sum()
+    pct = 100.0 * n_gps / max(len(out), 1)
+    print(f"  {n_gps} of {len(out)} culverts ({pct:.0f}%) exceed the 1.5 m "
+          f"horizontal-accuracy standard.")
 
 
 if __name__ == "__main__":

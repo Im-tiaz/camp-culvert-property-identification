@@ -178,7 +178,8 @@ def main():
     if args.dimensions:
         dims = pd.read_csv(args.dimensions, dtype=str)
         dims["_JoinKey"] = dims["Culvert ID"].astype(str).map(safe_folder_name)
-        keep = ["_JoinKey", "Dimension_Flag", "Dimension_Detail", "Closest_Standard"]
+        keep = ["_JoinKey", "Dimension_Flag", "Dimension_Detail", "Closest_Standard",
+                "MultiBarrelWidth_Flag", "GPSAccuracy_Flag"]
         merged = merged.merge(dims[keep].drop_duplicates("_JoinKey"),
                               on="_JoinKey", how="left")
         print("Dimension flags merged.")
@@ -278,7 +279,7 @@ def main():
         "EndSection_Prediction", "EndSection_Confidence", "EndSection_QC",
         # dimensions
         "Span (inches)", "Rise (inches)",
-        "Dimension_Flag", "Dimension_Detail", "Closest_Standard",
+        "Dimension_Flag", "Dimension_Detail", "Closest_Standard", "MultiBarrelWidth_Flag",
     ]
     available = [c for c in compact_cols if c in merged.columns]
     compact = merged[available]
